@@ -56,15 +56,16 @@ export class App {
         this.app.use(function(req: any, res: any, next: any) {
             res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
 
-            if (true) {
+            if (req.secure) {
                 // request was via https, so do no special handling
                 console.log("request from https")
                 next();
-            } else {
+            }
+             else {
                 if(req.headers.host != 'localhost:' + App.PORT && req.headers.host != process.env.EXTERNAL_IP){
                     // request was via http, so redirect to https
                     console.log("this got executed")
-                    res.redirect('https://' + req.headers.host + req.url)
+                    next();
                 } else {
                     next();
                 }
