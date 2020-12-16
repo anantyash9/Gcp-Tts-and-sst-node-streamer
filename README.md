@@ -5,5 +5,5 @@ GOOGLE_APPLICATION_CREDENTIALS=/path/to/service_account.json
 PROJECT_ID=[gcp-project-id]
 
 # To Run 
-sudo npm install
+sudo npm install  
 npm run-script watch
