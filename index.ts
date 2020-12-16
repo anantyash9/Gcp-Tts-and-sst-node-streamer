@@ -58,6 +58,7 @@ export class App {
 
             if (req.secure) {
                 // request was via https, so do no special handling
+                console.log("request from https")
                 next();
             } else {
                 if(req.headers.host != 'localhost:' + App.PORT && req.headers.host != process.env.EXTERNAL_IP){

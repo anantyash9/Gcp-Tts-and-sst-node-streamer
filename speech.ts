@@ -35,6 +35,7 @@ export class Speech {
           // Select the type of audio encoding
           audioConfig: {
             audioEncoding: "LINEAR16", //'LINEAR16|MP3|AUDIO_ENCODING_UNSPECIFIED/OGG_OPUS'
+            
           },
           input: null
         };
@@ -47,6 +48,7 @@ export class Speech {
               // enableSpeakerDiarization: true,
               // diarizationSpeakerCount: 2,
               useEnhanced: true,
+              language_code:"en-IN",
               metadata: {
                 microphoneDistance: 'NEARFIELD', //MIDFIELD
                 interactionType: 'DICTATION',
