@@ -63,6 +63,7 @@ export class App {
             } else {
                 if(req.headers.host != 'localhost:' + App.PORT && req.headers.host != process.env.EXTERNAL_IP){
                     // request was via http, so redirect to https
+                    console.log("this got executed")
                     res.redirect('https://' + req.headers.host + req.url)
                 } else {
                     next();
