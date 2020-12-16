@@ -56,7 +56,7 @@ export class App {
         this.app.use(function(req: any, res: any, next: any) {
             res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
 
-            if (req.secure) {
+            if (true) {
                 // request was via https, so do no special handling
                 console.log("request from https")
                 next();
