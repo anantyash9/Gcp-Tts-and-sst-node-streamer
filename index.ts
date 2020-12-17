@@ -47,10 +47,23 @@ export class App {
 
         this.baseLang = process.env.LANGUAGE_CODE;
     }
-
+    options: cors.CorsOptions = {
+        allowedHeaders: [
+          'Origin',
+          'X-Requested-With',
+          'Content-Type',
+          'Accept',
+          'X-Access-Token',
+        ],
+        credentials: true,
+        methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
+        origin: 'https://intervu.tech',
+        preflightContinue: false,
+      };
     private createApp(): void {
         this.app = express();
-        this.app.use(cors());
+        this.app.use(cors(this.options));
+        this.app.options('*', cors(this.options))
         this.app.set('trust proxy', true);
   
         this.app.use(function(req: any, res: any, next: any) {
