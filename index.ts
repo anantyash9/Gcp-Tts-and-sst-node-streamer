@@ -49,7 +49,7 @@ export class App {
     }
     private createApp(): void {
         this.app = express();
-        this.app.use(cors({origin:'https://intervu.tech'}));
+        this.app.use(cors({origin:'*'}));
         this.app.set('trust proxy', true);
   
         this.app.use(function(req: any, res: any, next: any) {
@@ -83,7 +83,8 @@ console.log()
 
     private sockets(): void {
         this.io = socketIo(this.server);
-        // this.io.set('origins', '*:*');
+
+        this.io.origins('*:*');
     }
 
     private listen(): void {
