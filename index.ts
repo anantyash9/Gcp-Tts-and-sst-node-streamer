@@ -75,7 +75,7 @@ export class App {
 console.log()
         });
         this.app.use('/', express.static(path.join(__dirname, '../dist/public')));
-        this.app.get('test',(request,response)=>{response.send('server is working')})
+        this.app.get('/test',(request,response)=>{response.send('server is working')})
     }
 
     private createServer(): void {
