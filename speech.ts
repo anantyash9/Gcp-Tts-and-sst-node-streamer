@@ -49,6 +49,8 @@ export class Speech {
               // diarizationSpeakerCount: 2,
               useEnhanced: true,
               language_code:"en-IN",
+              speech_contexts:['python','function','range','object','data','xrange','used','modules','variable','language','local','list','private','difference','heap','imported','generate','class','interpreted','technique','arrays','elements','pythonpath','lambda','instance','namespace','interpreter','programming','differentiate','anonymous','parameters','pep','runtime','readability','enhancement','executable',
+            'PEP stands for Python Enhancement Proposal number 8. It is a set of rules that specify how to format Python code for maximum readiablity'],
               metadata: {
                 microphoneDistance: 'NEARFIELD', //MIDFIELD
                 interactionType: 'DICTATION',
