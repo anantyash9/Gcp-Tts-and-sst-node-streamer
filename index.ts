@@ -49,7 +49,7 @@ export class App {
     }
     private createApp(): void {
         this.app = express();
-        this.app.use(cors());
+        this.app.use(cors({origin:'https://intervu.tech'}));
         this.app.set('trust proxy', true);
   
         this.app.use(function(req: any, res: any, next: any) {
