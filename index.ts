@@ -111,18 +111,19 @@ console.log()
                 // get the target language
                 const targetLang = data.language;
 
+                const speechContext=data.speechContext
+
                 stream.pipe(fs.createWriteStream(filename));
-                speech.speechStreamToText(stream, targetLang, async function(transcribeObj: any){
+                speech.speechStreamToText(stream, speechContext, async function(transcribeObj: any){
          
                     // console.log(transcribeObj.words[0].speakerTag);
                     // don't want to transcribe the tts output
                     // if(transcribeObj.words[0].speakerTag > 1) return;
-
-                    me.socketClient.emit('transcript', transcribeObj.transcript);
+                    console.log(transcribeObj.results[0].alternatives)
+                    me.socketClient.emit('transcript', transcribeObj.results[0].alternatives[0].transcript);
 
                     // TTS the answer
 
-                
                 });
             
             });

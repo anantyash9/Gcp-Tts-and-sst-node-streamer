@@ -44,13 +44,11 @@ export class Speech {
             config: {
               sampleRateHertz: this.sampleRateHertz,
               encoding: this.encoding,
-              enableAutomaticPunctuation: true,
+              enableAutomaticPunctuation: false,
               // enableSpeakerDiarization: true,
               // diarizationSpeakerCount: 2,
               useEnhanced: true,
-              language_code:"en-IN",
-              speech_contexts:['python','function','range','object','data','xrange','used','modules','variable','language','local','list','private','difference','heap','imported','generate','class','interpreted','technique','arrays','elements','pythonpath','lambda','instance','namespace','interpreter','programming','differentiate','anonymous','parameters','pep','runtime','readability','enhancement','executable',
-            'PEP stands for Python Enhancement Proposal number 8. It is a set of rules that specify how to format Python code for maximum readiablity'],
+              languageCode:"en-IN",
               metadata: {
                 microphoneDistance: 'NEARFIELD', //MIDFIELD
                 interactionType: 'DICTATION',
@@ -61,25 +59,26 @@ export class Speech {
         };
     }
 
-    async speechToText(audio: Buffer, lang: string) {
-        this.sttRequest.config.languageCode = lang;
-        this.sttRequest.audio = {
-            content: audio,
-        };
+    // async speechToText(audio: Buffer, lang: string) {
+    //     this.sttRequest.config.languageCode = lang;
+    //     this.sttRequest.audio = {
+    //         content: audio,
+    //     };
 
-        const responses = await this.stt.recognize(this.sttRequest);
-        const results = responses[0].results[0].alternatives[0];
-        return {
-            'transcript' : results.transcript,
-            'detectLang': lang
-        };
-    }
+    //     const responses = await this.stt.recognize(this.sttRequest);
+    //     const results = responses[0].results[0].alternatives[0];
+    //     return {
+    //         'transcript' : results.transcript,
+    //         'detectLang': lang
+    //     };
+    // }
 
-    async speechStreamToText(stream: any, lang: string, cb: Function) { 
-      this.sttRequest.config.languageCode = lang;
+    async speechStreamToText(stream: any, speechContext: string, cb: Function) { 
+      this.sttRequest.config.speechContexts=[{'phrases': speechContext}];
+      console.log(this.sttRequest)
       const recognizeStream = this.stt.streamingRecognize(this.sttRequest)
       .on('data', function(data: any){
-        cb(data.results[0].alternatives[0]);
+        cb(data);
       })
       .on('error', (e: any) => {
         console.log(e);
@@ -114,7 +113,7 @@ export class Speech {
         this.ttsRequest.audioConfig.speakingRate = 0.95;
       } else {
         this.ttsRequest.audioConfig.pitch = 0;
-        this.ttsRequest.audioConfig.speakingRate = 1;      
+        this.ttsRequest.audioConfig.speakingRate =  0.95;      
       }
     }
 
