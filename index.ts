@@ -28,6 +28,19 @@ import * as fs from 'fs';
 
 const ss = require('socket.io-stream');
 
+const speech1 = require('@google-cloud/speech');
+const config = {
+    encoding: "LINEAR16",
+    sampleRateHertz: 16000,
+    languageCode: 'en-US',
+    speechContexts:[{'phrases': ['']}],
+  };
+  const request = {
+    config,
+    interimResults: true, //Get interim results from stream
+  };
+const speechClient = new speech1.SpeechClient();
+
 dotenv.config();
 sourceMapSupport.install();
 
@@ -96,6 +109,9 @@ console.log()
 
         this.io.on('connect', (client: any) => {
             var me = this;
+            let recognizeStream: any = null;
+            let temprequest=request;
+
             me.socketClient = client;
             console.log(`Client connected [id=${client.id}]`);
             client.emit('server_setup', `Server connected [id=${client.id}]`);
@@ -104,31 +120,84 @@ console.log()
                 me.socketClient.emit('audio', audio);
             }).catch(function(e: any) { console.log(e); })
         })
-            // simple DF detectIntent call
-            ss(client).on('stream-speech', async function (stream: any, data: any) {
-                // get the file name
-                const filename = path.basename(data.name);
-                // get the target language
-                const targetLang = data.language;
+        client.on('startGoogleCloudStream', function (data:any) {
+            console.log('STRMbeg');
+             startRecognitionStream(client);
+         });
+         client.on('endGoogleCloudStream', function (data: any) {
+            console.log('STRMend');
+              stopRecognitionStream();
+          });
+          client.on('binaryData', function (data:any) {
+            //console.log('data ' +data.length); //log binary data
+           if (recognizeStream !== null) {
+             //console.log('toSTRM')
+               recognizeStream.write(data);
+           }
 
-                const speechContext=data.speechContext
+       });
+       client.on('setcontext', function (data:any) {
+           console.log(data)
+        temprequest.config.speechContexts=[{'phrases': data}]
 
-                stream.pipe(fs.createWriteStream(filename));
-                speech.speechStreamToText(stream, speechContext, async function(transcribeObj: any){
-         
-                    // console.log(transcribeObj.words[0].speakerTag);
-                    // don't want to transcribe the tts output
-                    // if(transcribeObj.words[0].speakerTag > 1) return;
-                    console.log(transcribeObj.results[0].alternatives)
-                    me.socketClient.emit('transcript', transcribeObj.results[0].alternatives[0].transcript);
-
-                    // TTS the answer
-
-                });
-            
+   });
+       function startRecognitionStream(client:any) {
+        //    console.log(temprequest.config.speechContexts)
+        recognizeStream = speechClient.streamingRecognize(temprequest)
+            .on('error', console.error)
+            .on('data', (data:any) => {
+              /*  Dev only logging
+                process.stdout.write(
+                    (data.results[0] && data.results[0].alternatives[0])
+                        ? `Transcription: ${data.results[0].alternatives[0].transcript}\n`
+                        : `\n\nReached transcription time limit, press Ctrl+C\n`);
+              */
+                console.log(data.results[0].alternatives[0].transcript)
+                client.emit('speechData', data.results[0]);
+    
+                // if end of utterance, let's restart stream
+                // this is a small hack. After 65 seconds of silence, the stream will still throw an error for speech length limit
+                if (data.results[0].isFinal) {
+                    stopRecognitionStream();
+                    startRecognitionStream(client);
+                    console.log('restarted stream serverside');
+                }
             });
+    }
+    
+    function stopRecognitionStream() {
+        if (recognizeStream) {
+            recognizeStream.end();
+        }
+        recognizeStream = null;
+    }
+
+            // // simple DF detectIntent call
+            // ss(client).on('stream-speech', async function (stream: any, data: any) {
+            //     // get the file name
+            //     // get the target language
+            //     const targetLang = data.language;
+
+            //     const speechContext=data.speechContext
+            //     console.log("called")
+            //     // stream.pipe(fs.createWriteStream(filename));
+            //     // speech.speechStreamToText(stream, speechContext, async function(transcribeObj: any){
+         
+            //     //     // console.log(transcribeObj.words[0].speakerTag);
+            //     //     // don't want to transcribe the tts output
+            //     //     // if(transcribeObj.words[0].speakerTag > 1) return;
+            //     //     console.log(transcribeObj.results[0].alternatives)
+            //     //     me.socketClient.emit('transcript', transcribeObj.results[0].alternatives[0].transcript);
+
+            //     //     // TTS the answer
+
+            //     // });
+            
+            // });
+
         });
     }
 }
+
 
 export let app = new App();

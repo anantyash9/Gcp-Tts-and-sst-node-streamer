@@ -1,3 +1,4 @@
+import { isUndefined } from "util";
 
 
 const speechToText = require('@google-cloud/speech').v1p1beta1;
@@ -15,6 +16,7 @@ export class Speech {
     private stt: any;
     private ttsRequest: LooseObject;
     private sttRequest: LooseObject;
+    private recognizeStream: any;
       
     constructor() {
         this.encoding = "LINEAR16";
@@ -41,22 +43,28 @@ export class Speech {
         };
 
         this.sttRequest = {
+
             config: {
               sampleRateHertz: this.sampleRateHertz,
               encoding: this.encoding,
               enableAutomaticPunctuation: false,
               // enableSpeakerDiarization: true,
               // diarizationSpeakerCount: 2,
-              useEnhanced: true,
+              useEnhanced: false,
               languageCode:"en-IN",
               metadata: {
                 microphoneDistance: 'NEARFIELD', //MIDFIELD
                 interactionType: 'DICTATION',
                 audioTopic: 'interview'
               }
-            }
+            },
 
         };
+        this.recognizeStream = this.stt
+  .streamingRecognize(this.sttRequest )
+  .on('error', console.error)
+  .on('data', (data:any) =>{console.log(data.results[0].alternatives[0].transcript)}
+    )
     }
 
     // async speechToText(audio: Buffer, lang: string) {
@@ -74,23 +82,28 @@ export class Speech {
     // }
 
     async speechStreamToText(stream: any, speechContext: string, cb: Function) { 
-      this.sttRequest.config.speechContexts=[{'phrases': speechContext}];
-      console.log(this.sttRequest)
-      const recognizeStream = this.stt.streamingRecognize(this.sttRequest)
-      .on('data', function(data: any){
-        cb(data);
-      })
-      .on('error', (e: any) => {
-        console.log(e);
-      })
-      .on('end', () => {
-        console.log('on end');
-      });
+
+      // // if( this.recognizeStream===undefined){
+      // this.sttRequest.config.speechContexts=[{'phrases': speechContext}];
+      // // console.log(this.sttRequest)
+
+      // let recognizeStream = this.stt.streamingRecognize(this.sttRequest)
+      // .on('data', function(data: any){
+      //   console.log(data.results[0].alternatives)
+      //   cb(data);
+      // })
+      // .on('error', (e: any) => {
+      //   console.log(e);
+      // })
+      // .on('end', () => {
+      //   console.log('on end');
+      // });
+    // }
     
-      stream.pipe(recognizeStream);
-      stream.on('end', function() {
-          //fileWriter.end();
-      });
+      stream.pipe(this.recognizeStream);
+      // stream.on('end', function() {
+      //     //fileWriter.end();
+      // });
     };
 
     async textToSpeech(text: string, lang: string) {
